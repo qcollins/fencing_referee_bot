@@ -139,27 +139,15 @@ include_directories(
 # add_dependencies(first_package_cs378 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 # OpenCV examples
-add_executable(im_thresholding src/computer_vision_examples/im_thresholding.cpp)
-target_link_libraries(im_thresholding ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-
-add_executable(im_edge_detector src/computer_vision_examples/im_edge_detector.cpp)
-target_link_libraries(im_edge_detector ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-
-add_executable(im_GaussianBlur src/computer_vision_examples/im_GaussianBlur.cpp)
-target_link_libraries(im_GaussianBlur ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-
-add_executable(im_remove_channel src/computer_vision_examples/im_remove_channel.cpp)
-target_link_libraries(im_remove_channel ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-
-add_executable(im_grayscale src/computer_vision_examples/im_grayscale.cpp)
-target_link_libraries(im_grayscale ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-
-add_executable(motion_history_example src/computer_vision_examples/motion_history_example.cpp)
-target_link_libraries(motion_history_example ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(filter_green src/filter_green.cpp)
 target_link_libraries(filter_green ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
+add_executable(filter_red src/filter_red.cpp)
+target_link_libraries(filter_red ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(scorelight_detector src/scorelight_detector.cpp)
+target_link_libraries(scorelight_detector ${catkin_LIBRARIES})
 
 #############
 ## Install ##

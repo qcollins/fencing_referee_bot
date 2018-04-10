@@ -11,12 +11,12 @@
 static const std::string OPENCV_WINDOW 	= "Image window";
 static const std::string OUT_WINDOW 	= "Output window";
 
-static const int LIMIT = 1000;
+static const int LIMIT = 10000;
 
 class ImageConverter
 {
 	ros::NodeHandle nh_;
-	ros::Publisher	green_pub_; 
+	ros::Publisher	red_pub_; 
 
 	image_transport::ImageTransport it_;
 	image_transport::Subscriber 	image_sub_;
@@ -26,7 +26,7 @@ public:
   ImageConverter()
     : it_(nh_)
   {
-		green_pub_ = nh_.advertise<std_msgs::Bool>("green", 1000);
+		red_pub_ = nh_.advertise<std_msgs::Bool>("red", 1000);
 		image_sub_ = it_.subscribe("/camera/rgb/image_rect_color", 1, 
 								   &ImageConverter::imageCb, this);
 		image_pub_ = it_.advertise("/image_converter/output_video", 1);
@@ -57,34 +57,33 @@ public:
 		cv::Size s = cv_ptr->image.size();
 		int pix_counter = 0;
             
-		/* Processing each frame; only keeps pixel if it is green */
+		/* Processing each frame; only keeps pixel if it is red */
 		for(int row = 0; row < s.height; row++) {
 			for(int col = 0; col < s.width; col++) {
 				cv::Vec3b color = (cv_ptr->image).at<cv::Vec3b>(cv::Point(col, row));
 				int r = color[2];
 				int g = color[1];
 				int b = color[0];
-				int green_thresh = g - 15;
-				if(b > green_thresh || r > green_thresh) {
-					color = cv::Vec3b(0,0,0);
-				} else {
+				int red_thresh = r - 15;
+				if(r >= 95 && g <= b && r > g) {
 					pix_counter++;
+				} else {
+					color = cv::Vec3b(0,0,0);
 				}
             
 				outImg.at<cv::Vec3b>(cv::Point(col, row)) = color;
 			}
 		}
     
-		/* Sends detection of green score light as a bool */
+		/* Sends detection of red score light as a bool */
 		/* TODO: Figure out limit/threshold */
-		std_msgs::Bool is_green;
-		is_green.data = false;
+		std_msgs::Bool is_red;
+		is_red.data = false;
 		if (pix_counter > LIMIT) {
-			is_green.data = true;
+			is_red.data = true;
 		}
 		
-		//ROS_INFO("%d", is_green.data);
-		green_pub_.publish(is_green);
+		red_pub_.publish(is_red);
 
 		/* Any remaining output/functions */
 		cv::imshow(OUT_WINDOW, outImg);
