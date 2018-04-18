@@ -149,6 +149,8 @@ target_link_libraries(filter_red ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_executable(scorelight_detector src/scorelight_detector.cpp)
 target_link_libraries(scorelight_detector ${catkin_LIBRARIES})
 
+add_executable(tournament src/tournament.cpp)
+target_link_libraries(tournament ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 #############
 ## Install ##
 #############

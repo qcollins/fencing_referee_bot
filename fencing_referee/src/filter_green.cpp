@@ -9,7 +9,7 @@
 #include <std_msgs/Bool.h>
 
 static const std::string OPENCV_WINDOW 	= "Image window";
-static const std::string OUT_WINDOW 	= "Output window";
+static const std::string OUT_WINDOW 	= "Green Filter";
 
 static const int LIMIT = 1000;
 
@@ -29,7 +29,7 @@ public:
 		green_pub_ = nh_.advertise<std_msgs::Bool>("green", 1000);
 		image_sub_ = it_.subscribe("/camera/rgb/image_rect_color", 1, 
 								   &ImageConverter::imageCb, this);
-		image_pub_ = it_.advertise("/image_converter/output_video", 1);
+		image_pub_ = it_.advertise("/green_filter/green_image", 1);
 
 		cv::namedWindow(OPENCV_WINDOW);
   }
@@ -95,7 +95,7 @@ public:
 
 int main(int argc, char** argv)
 {
-	  ros::init(argc, argv, "image_converter");
+	  ros::init(argc, argv, "green_filter");
 	  ImageConverter ic;
 	  ros::spin();
 	  return 0;

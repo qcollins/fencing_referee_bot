@@ -1,40 +1,38 @@
-#include <ros/ros.h>
 #include <cmath> 
+#include <ros/ros.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Int8.h>
 using namespace std;
 
+/* Message integer constants */
+static const int NONE  = 0;
 static const int RED   = 1;
 static const int GREEN = 2;
 static const int BOTH  = 3;
 
-int red = 0;
+/* Color initializations */
+int red   = 0;
+int green = 0;
 
+/* Red callback - sets red = 1 if red is detected */
 void redCB(std_msgs::Bool is_red)
 {
 	if(is_red.data == true) {
 		red = 1;
-		//ROS_INFO("FUCK\n");
 	} else {
 		red = 0;
 	}
-	
-	/*else if(is_red.data == false && RED_COUNT > 0) {
-		red = 0;
-		RED_COUNT --;
-	}
-	
-	if(RED_COUNT >= 15) {
-		RED_COUNT = 0;
-		
-	}*/
 }
 
-/*void greenCB(std_msgs::Bool is_green){
-	if(is_red.data == True) {
-		RED_COUNT ++;
+/* Green callback - sets green = 1 if green is detected */
+void greenCB(std_msgs::Bool is_green)
+{
+	if(is_green.data == true) {
+		green = 1;
+	} else {
+		green = 0;
 	}
-}*/
-
+}
 
 int main(int argc, char **argv) {
 		/* Initializing our node */
@@ -42,71 +40,65 @@ int main(int argc, char **argv) {
 	
 		/* Subscribers & Publishers */
 		ros::NodeHandle nh_;
-		//ros::Publisher  score_pub = nh_.advertise<geometry_msgs::Twist>("/turtle1/cmd_vel", 10);
-		//ros::Subscriber green_sub = nh_.subscribe("/green", 100, greenCB);
+		ros::Publisher  score_pub = nh_.advertise<std_msgs::Int8>("score", 1);
+		ros::Subscriber green_sub = nh_.subscribe("/green", 1, greenCB);
 		ros::Subscriber red_sub   = nh_.subscribe("/red",   1, redCB);
-	
-		//if (green_sub.output = true) {
-			// ...
-		//}
 		
-		/* publish velocity commands forward until we move the desired distance */
+		/* Initializing variables */
 		ros::Rate loop_rate(60); //60 Hz
 		
-		//int    red_on = 0;	
-		double red_timer = 0.0;
+		double red_timer   = 0.0;
+		double green_timer = 0.0;
 		
+		std_msgs::Int8 score;
+		score.data = NONE;
+		double timer = 0.0;
+
+		/* Begin detection of colors; pauses if color is detected */
 		while(ros::ok()) {
 			ros::spinOnce();
-			if (red == 1 && ros::Time::now().toSec() > red_timer) {
-				red_timer = ros::Time::now().toSec() + 3;
-				// increase score
-				ROS_INFO("Hello\n");
+			
+			bool red_s   = false;
+			bool green_s = false;
+			bool update_time = false;
+			
+			if (timer < ros::Time::now().toSec()) {
+				/* If red is detected */
+				if (red == 1) {
+					red_s = true;
+					update_time = true;
+				}
+				
+				/* If green is detected */
+				if (green == 1) {
+					green_s = true;
+					update_time = true;
+				}
+				
+				/* Pause detection if either/both color(s) are detected */
+				if (update_time) {
+					timer = ros::Time::now().toSec() + 3;
+				}
 			}
+			
+			/* Assign relevant data to Int msg */
+			if (red_s == true && green_s == true) {
+				score.data = BOTH;
+			} else if (red_s == false && green_s == true) { 
+				score.data = GREEN;
+			} else if (red_s == true && green_s == false) {
+				score.data = RED;
+			} 
+			
+			/* Publish if there is data */
+			if (score.data != NONE) {
+				score_pub.publish(score);
+			}
+			score.data = NONE;
+			
+			/* Sleep */
 			loop_rate.sleep();
 		}
-				
-				
-			/*	
-				if (red_on == 0) {
-					// increase score
-					red_on++;
-					// sleep subscriber
-				} else if (red_on > 0 && red_on < 15) {
-					red_on++;
-				} else { //(red_on > 15) if red is on for >15s
-					red_on = 0;
-				}				
-			} else {
-				// do nothing
-			}
-		}*/
-	
-		/*bool red   = false;
-		bool green = false;
-		std_msgs::Int8 score;*/
-		//...code		
-		/* 
-		 * if (red flashes for 15 cycles)
-		 * 		red = true;
-		 * 		sleep subscriber for 5 sec
-		 * if (green flashes for 15 cycles)
-		 * 		green = true;
-		 * 		sleep subscriber for 5 sec
-		 * 
-		 * 
-		 */
-		/*
-		if (red == true && green == true) { // i.e. both lights flash
-			score.data = BOTH;
-		} else if (green == true) {
-			score.data = GREEN;
-		} else { // red == true 
-			score.data = RED;
-		}
-		score_pub.publish(score);
-		*/	
-	
-	return 0;
+			
+		return 0;
 }
-

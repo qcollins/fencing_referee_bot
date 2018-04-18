@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include <cmath>
+#include <stdlib.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
@@ -9,7 +10,7 @@
 #include <std_msgs/Bool.h>
 
 static const std::string OPENCV_WINDOW 	= "Image window";
-static const std::string OUT_WINDOW 	= "Output window";
+static const std::string OUT_WINDOW 	= "Red Filter";
 
 static const int LIMIT = 10000;
 
@@ -29,7 +30,7 @@ public:
 		red_pub_ = nh_.advertise<std_msgs::Bool>("red", 1000);
 		image_sub_ = it_.subscribe("/camera/rgb/image_rect_color", 1, 
 								   &ImageConverter::imageCb, this);
-		image_pub_ = it_.advertise("/image_converter/output_video", 1);
+		image_pub_ = it_.advertise("/filter_red/red_image", 1);
 
 		cv::namedWindow(OPENCV_WINDOW);
   }
@@ -56,7 +57,7 @@ public:
 		cv::Mat outImg = cv_ptr->image.clone();
 		cv::Size s = cv_ptr->image.size();
 		int pix_counter = 0;
-            
+        //cv::inRange(cv_ptr->image, cv::Scalar(0, 0, 0), cv::Scalar(50, 50, 255), outImg);
 		/* Processing each frame; only keeps pixel if it is red */
 		for(int row = 0; row < s.height; row++) {
 			for(int col = 0; col < s.width; col++) {
@@ -64,8 +65,8 @@ public:
 				int r = color[2];
 				int g = color[1];
 				int b = color[0];
-				int red_thresh = r - 15;
-				if(r >= 95 && g <= b && r > g) {
+				
+				if(r >= 110 && g <= b && r > g) {
 					pix_counter++;
 				} else {
 					color = cv::Vec3b(0,0,0);
@@ -94,7 +95,7 @@ public:
 
 int main(int argc, char** argv)
 {
-	  ros::init(argc, argv, "image_converter");
+	  ros::init(argc, argv, "filter_red");
 	  ImageConverter ic;
 	  ros::spin();
 	  return 0;
