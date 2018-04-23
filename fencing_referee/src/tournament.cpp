@@ -140,7 +140,7 @@ vector<pair<int, int> > get_table(int numFencers)
 /* 
  * Commences individual bouts
  */
-pair<int, int> bout(int max_score, int name_1_index, int name_2_index) 
+pair<int, int> bout(int max_score, int name_1_index, int name_2_index, ros::Publisher sound_pub) 
 {
 	int fencer1_score = 0;
 	int fencer2_score = 0;
@@ -157,24 +157,36 @@ pair<int, int> bout(int max_score, int name_1_index, int name_2_index)
 		if (score == RED) {
 			fencer1_score++;
 			ROS_INFO("Score: %d vs. %d", fencer1_score, fencer2_score);
+			string sound = "Halt!" + to_str(fencer1_score) + " to " + to_str(fencer2_score);
+			say_string(sound_pub, sound);
 		} else if (score == GREEN) {
 			fencer2_score++;
 			ROS_INFO("Score: %d vs. %d", fencer1_score, fencer2_score);
+			string sound = "Halt!" + to_str(fencer1_score) + " to " + to_str(fencer2_score);
+			say_string(sound_pub, sound);
 		} else if (score == BOTH) {
 			fencer1_score++;
 			fencer2_score++;
+			
+			if (fencer1_score == max_score && fencer2_score == max_score) {
+				fencer1_score--;
+				fencer2_score--;
+			} 
+			
 			ROS_INFO("Score: %d vs. %d", fencer1_score, fencer2_score);
+			string sound = "Halt!" + to_str(fencer1_score) + " to " + to_str(fencer2_score);
+			say_string(sound_pub, sound);
 		}
 		
 		score = NONE;
 			
-		if (fencer1_score == max_score && fencer2_score == max_score) {
-			fencer1_score--;
-			fencer2_score--;
-		} else if (fencer1_score == max_score || fencer2_score == max_score) {
+		if (fencer1_score == max_score || fencer2_score == max_score) {
 			pair<int, int> result;
-			result.first = fencer1_score;
+			result.first  = fencer1_score;
 			result.second = fencer2_score;
+			
+			string sound = "End bout. " + to_str(fencer1_score) + " to " + to_str(fencer2_score);
+			say_string(sound_pub, sound);
 			
 			return result;
 		}
@@ -205,7 +217,7 @@ vector <vector <int> > commence_tournament(string names[],
 		ROS_INFO("Bout %d: Fencers %s and %s to fence.", 
 				  i + 1, names[fencer1].c_str(), names[fencer2].c_str());
 		
-		pair<int, int> result = bout(MAX_SCORE, fencer1, fencer2);
+		pair<int, int> result = bout(MAX_SCORE, fencer1, fencer2, sound_pub);
 		
 		table[fencer1][fencer2] = result.first;
 		table[fencer2][fencer1] = result.second;
@@ -253,8 +265,12 @@ pair<string, pair<int, int> > calculate_result(string names[],
 /* 
  * Output/Result-printing helper function
  */ 
-void output_list(vector<pair<string, pair<int, int> > > result_list, int numFencers)
+void output_list(vector<pair<string, pair<int, int> > > result_list, int numFencers, ros::Publisher sound_pub)
 {	
+	string done = "Pool done. Check the computer for your score.";
+	cout << endl << done << endl;
+	say_string(sound_pub, done);
+	
 	cout << "\nThe results are: \n";
 	for (int i = 0; i < numFencers; i++) {
 		cout << i + 1 << ". "   << result_list[i].first << "\t"
@@ -268,7 +284,7 @@ void output_list(vector<pair<string, pair<int, int> > > result_list, int numFenc
  * the results
  */ 
 void calculate_results(string names[], vector<vector <int> > table,
-					  int numFencers)
+					  int numFencers, ros::Publisher sound_pub)
 {
 	vector<pair<string, pair<int, int> > > result_list;
 	
@@ -282,7 +298,7 @@ void calculate_results(string names[], vector<vector <int> > table,
 	stable_sort(result_list.begin(), result_list.end(), comp_victory);
 	
 	/* Output results */
-	output_list(result_list, numFencers);
+	output_list(result_list, numFencers, sound_pub);
 }
 
 /*  --------------- MAIN --------------- */
@@ -294,7 +310,7 @@ int main(int argc, char **argv)
 		/* Subscribers & Publishers */
 		ros::NodeHandle nh_;
 		ros::Subscriber score_sub = nh_.subscribe("/score", 1, scoreCB);
-		ros::Publisher  sound_pub = nh_.advertise<sound_play::SoundRequest>("/robotsound", 1);
+		ros::Publisher  sound_pub = nh_.advertise<sound_play::SoundRequest>("/robotsound", 5);
 		ros::Rate loop_rate(60); 	
 					
 		/* Initializing fencers */
@@ -318,7 +334,7 @@ int main(int argc, char **argv)
 		table = commence_tournament(names, table, pool, numFencers, sound_pub);
 			
 		/* Calculate the results of the bout, and output results */
-		calculate_results(names, table, numFencers);
+		calculate_results(names, table, numFencers, sound_pub);
 		
 		return 0;
 }

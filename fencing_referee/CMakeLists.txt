@@ -146,6 +146,9 @@ target_link_libraries(filter_green ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_executable(filter_red src/filter_red.cpp)
 target_link_libraries(filter_red ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
+add_executable(filter_blue src/filter_blue.cpp)
+target_link_libraries(filter_blue ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
 add_executable(scorelight_detector src/scorelight_detector.cpp)
 target_link_libraries(scorelight_detector ${catkin_LIBRARIES})
 

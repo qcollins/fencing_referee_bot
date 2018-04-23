@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
 				
 				/* Pause detection if either/both color(s) are detected */
 				if (update_time) {
-					timer = ros::Time::now().toSec() + 3;
+					timer = ros::Time::now().toSec() + 5;
 				}
 			}
 			
