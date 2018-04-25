@@ -7,6 +7,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>  
 #include <std_msgs/Bool.h>
+#include <std_msgs/Float32.h>
 
 // https://docs.opencv.org/2.4/doc/tutorials/imgproc/erosion_dilatation/erosion_dilatation.html
 
@@ -19,6 +20,7 @@ class ImageConverter
 {
 	ros::NodeHandle nh_;
 	ros::Publisher	blue_pub_; 
+	ros::Publisher	avg_blue_pub_; 
 
 	image_transport::ImageTransport it_;
 	image_transport::Subscriber 	image_sub_;
@@ -28,6 +30,7 @@ public:
   ImageConverter()
     : it_(nh_)
   {
+                avg_blue_pub_ = nh_.advertise<std_msgs::Float32>("avg_blue", 1000);
 		blue_pub_ = nh_.advertise<std_msgs::Bool>("blue", 1000);
 		image_sub_ = it_.subscribe("/camera/rgb/image_rect_color", 1, 
 								   &ImageConverter::imageCb, this);
@@ -43,6 +46,8 @@ public:
 
   void imageCb(const sensor_msgs::ImageConstPtr& msg)
   {
+		double avg_blue_x = 0.0;
+		double num_blue_pix = 0.01;
 		/* Variable Initialization (1) */
 		cv_bridge::CvImagePtr cv_ptr;
     
@@ -71,6 +76,8 @@ public:
 					color = cv::Vec3b(0,0,0);
 				} else {
 					pix_counter++;
+					avg_blue_x += col;
+					num_blue_pix ++;
 				}
             
 				outImg.at<cv::Vec3b>(cv::Point(col, row)) = color;
@@ -87,6 +94,10 @@ public:
 		
 		//ROS_INFO("%d", is_blue.data);
 		blue_pub_.publish(is_blue);
+		
+		std_msgs::Float32 blue_x;
+		blue_x.data = (avg_blue_x/num_blue_pix - (s.width/2.0))/s.width * 100;
+		avg_blue_pub_.publish(blue_x);
 
 		/* Any remaining output/functions */
 		cv::imshow(OUT_WINDOW, outImg);
