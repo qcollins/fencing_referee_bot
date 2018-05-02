@@ -3,7 +3,7 @@ project(fencing_referee)
 
 # we are now using the OpenCV library
 find_package(OpenCV)
-include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS}, libs)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -140,9 +140,17 @@ include_directories(
 
 # OpenCV examples
 
+add_executable(filter_red2 src/filter_red2.cpp)
+target_link_libraries(filter_red2 ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
-add_executable(filter src/filter.cpp)
-target_link_libraries(filter ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+add_executable(filter_green2 src/filter_green2.cpp)
+target_link_libraries(filter_green2 ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(filter_blue2 src/filter_blue2.cpp)
+target_link_libraries(filter_blue2 ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(filter_white src/filter_white.cpp)
+target_link_libraries(filter_white ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(filter_green src/filter_green.cpp)
 target_link_libraries(filter_green ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})

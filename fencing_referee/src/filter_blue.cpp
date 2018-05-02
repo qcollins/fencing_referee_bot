@@ -30,7 +30,7 @@ public:
   ImageConverter()
     : it_(nh_)
   {
-                avg_blue_pub_ = nh_.advertise<std_msgs::Float32>("avg_blue", 1000);
+        avg_blue_pub_ = nh_.advertise<std_msgs::Float32>("avg_blue", 1000);
 		blue_pub_ = nh_.advertise<std_msgs::Bool>("blue", 1000);
 		image_sub_ = it_.subscribe("/camera/rgb/image_rect_color", 1, 
 								   &ImageConverter::imageCb, this);
@@ -84,7 +84,7 @@ public:
 			}
 		}
         
-		/* Sends detection of blue score light as a bool */
+		/* Sends detection of blue color as a bool */
 		/* TODO: Figure out limit/threshold */
 		std_msgs::Bool is_blue;
 		is_blue.data = false;
