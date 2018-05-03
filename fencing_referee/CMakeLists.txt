@@ -140,6 +140,9 @@ include_directories(
 
 # OpenCV examples
 
+add_executable(import_pairs src/import_pairs.cpp)
+target_link_libraries(import_pairs ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
 add_executable(filter_red2 src/filter_red2.cpp)
 target_link_libraries(filter_red2 ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
