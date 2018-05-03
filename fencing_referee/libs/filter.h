@@ -8,7 +8,7 @@ using namespace cv_bridge;
 //static const std::string OPENCV_WINDOW 	= "Image window";
 //static const std::string OUT_WINDOW 	= "Red Filter";
 
-static const int LIMIT = 10000;
+static int LIMIT = 10000;
 //int pix_counter = 0;
 
 CvImagePtr generate_cv_ptr(sensor_msgs::ImageConstPtr msg) {

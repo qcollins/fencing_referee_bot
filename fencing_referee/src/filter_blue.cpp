@@ -96,8 +96,13 @@ public:
 		blue_pub_.publish(is_blue);
 		
 		std_msgs::Float32 blue_x;
-		blue_x.data = (avg_blue_x/num_blue_pix - (s.width/2.0))/s.width * 100;
-		avg_blue_pub_.publish(blue_x);
+		if (num_blue_pix > 30) {
+			blue_x.data = (avg_blue_x/num_blue_pix - (s.width/2.0))/s.width * 100;
+			avg_blue_pub_.publish(blue_x);
+		} else {
+			blue_x.data = 0;
+			avg_blue_pub_.publish(blue_x);
+		}
 
 		/* Any remaining output/functions */
 		cv::imshow(OUT_WINDOW, outImg);

@@ -50,6 +50,7 @@ public:
 		image_pub_ = it_.advertise("/filter_red/red_image", 1);
 
 		namedWindow(OPENCV_WINDOW);
+		LIMIT = 12000;
   }
 
   ~ImageConverter()

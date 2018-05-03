@@ -22,7 +22,7 @@ Vec3b pix_fxn(Vec3b color, int col) {
     int r = color[2];
     int g = color[1];
     int b = color[0];
-    int green_thresh = g - 15;
+    int green_thresh = g - 10;
     if(b <= green_thresh && r <= green_thresh) {
         pix_counter++;
     } else {

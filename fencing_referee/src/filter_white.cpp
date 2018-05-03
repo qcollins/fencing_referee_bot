@@ -8,6 +8,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>  
 #include <std_msgs/Bool.h>
+#include <std_msgs/Float32.h>
 #include <filter.h>
 
 using namespace cv;
@@ -16,15 +17,17 @@ using namespace cv_bridge;
 static const std::string OPENCV_WINDOW 	= "Image window";
 static const std::string OUT_WINDOW 	= "White Filter";
 
-int pix_counter = 0;
+double pix_counter = 0.01;
+double avg_white_x = 0.0;
 
 Vec3b pix_fxn(Vec3b color, int col) {
     int r = color[2];
     int g = color[1];
     int b = color[0];
-
-    if(r> 200 && g > 200 && b > 200) {
+    
+    if(r> 180 && g > 180 && b > 180) {
         pix_counter++;
+        avg_white_x += col;
     } else {
         color = Vec3b(0,0,0);
     }
@@ -35,6 +38,7 @@ class ImageConverter
 {
 	ros::NodeHandle nh_;
 	ros::Publisher	white_pub_; 
+	ros::Publisher 	avg_white_pub_;
 
 	image_transport::ImageTransport it_;
 	image_transport::Subscriber 	image_sub_;
@@ -45,6 +49,7 @@ public:
     : it_(nh_)
   {
 		white_pub_ = nh_.advertise<std_msgs::Bool>("white", 1000);
+		avg_white_pub_ = nh_.advertise<std_msgs::Float32>("avg_white", 1000);
 		image_sub_ = it_.subscribe("/camera/rgb/image_rect_color", 1, 
 								   &ImageConverter::imageCb, this);
 		image_pub_ = it_.advertise("/filter_white/white_image", 1);
@@ -63,6 +68,7 @@ public:
 		
 		/* Variables Initialization (2) */
 		Mat outImg = process_image(cv_ptr, pix_fxn);
+		Size s = cv_ptr->image.size();
 	    
 		/* Sends detection of color white as a bool */
 		/* TODO: Figure out limit/threshold */
@@ -74,6 +80,18 @@ public:
 		
 		white_pub_.publish(is_white);
 
+		std_msgs::Float32 white_x;
+		if (pix_counter > 30) {
+			white_x.data = (avg_white_x/pix_counter - (s.width/2.0))/s.width * 100;
+			avg_white_pub_.publish(white_x);
+		} else {
+			white_x.data = 0;
+			avg_white_pub_.publish(white_x);
+		}
+		
+        pix_counter = 0.01;
+		avg_white_x = 0.0;
+        
 		/* Any remaining output/functions */
 		imshow(OUT_WINDOW, outImg);
 		waitKey(3);

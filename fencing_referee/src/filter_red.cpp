@@ -12,7 +12,7 @@
 static const std::string OPENCV_WINDOW 	= "Image window";
 static const std::string OUT_WINDOW 	= "Red Filter";
 
-static const int LIMIT = 10000;
+static const int LIMIT = 800;
 
 class ImageConverter
 {

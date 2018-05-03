@@ -39,10 +39,12 @@ void rotate()
 void pctCB(std_msgs::Float32 relative_pos)
 {
         if (relative_pos.data > 10) {
-                DIRECTION = 1;
-        } else if (relative_pos.data < -10) {
                 DIRECTION = -1;
-        }
+        } else if (relative_pos.data < -10) {
+                DIRECTION = 1;
+        } else {
+				DIRECTION = 0;
+		}
 }
 
 int main(int argc, char** argv) 
@@ -52,7 +54,7 @@ int main(int argc, char** argv)
         ros::NodeHandle nh_;
         
         velocity_pub = nh_.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
-        ros::Subscriber fencer_sub = nh_.subscribe("/avg_blue", 1, pctCB);
+        ros::Subscriber fencer_sub = nh_.subscribe("/avg_white", 1, pctCB);
         
         while(ros::ok()) {
                 //ros::spinOnce();
